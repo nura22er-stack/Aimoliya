@@ -27,6 +27,7 @@ type AdminSection = 'dashboard' | 'users' | 'billing' | 'notifications' | 'datab
 
 interface AdminPanelProps {
   section?: Extract<ViewType, 'admin-dashboard' | 'admin-users' | 'admin-billing' | 'admin-notif' | 'admin-db'>;
+  currentUser?: AppUser;
 }
 
 function sectionToTab(section?: AdminPanelProps['section']): AdminSection {
@@ -44,7 +45,7 @@ function sectionToTab(section?: AdminPanelProps['section']): AdminSection {
   }
 }
 
-export default function AdminPanel({ section = 'admin-dashboard' }: AdminPanelProps) {
+export default function AdminPanel({ section = 'admin-dashboard', currentUser }: AdminPanelProps) {
   const [activeTab, setActiveTab] = useState<AdminSection>(sectionToTab(section));
   const [search, setSearch] = useState('');
   const [filterTariff, setFilterTariff] = useState('All');
@@ -66,24 +67,11 @@ export default function AdminPanel({ section = 'admin-dashboard' }: AdminPanelPr
     { id: 'database', label: 'Ma\'lumotlar Bazasi', icon: Database }
   ];
 
-  // Default Users list under admin panel dashboard
-  const [users, setUsers] = useState<AppUser[]>([
-    { id: "1001", name: "Jaloliddin Rumi", email: "jalol@gmail.com", role: 'user', tariff: 'Pro', registeredAt: "2026-05-12", status: 'Aktiv', lastActive: "Bugun, 18:42" },
-    { id: "1002", name: "Dilnoza Aliyeva", email: "dilnot@ali.uz", role: 'user', tariff: 'Business', registeredAt: "2026-04-20", status: 'Aktiv', lastActive: "Bugun, 19:10" },
-    { id: "1003", name: "Murad Nazarov", email: "murad@corp.uz", role: 'user', tariff: 'Business', registeredAt: "2026-03-15", status: 'Aktiv', lastActive: "Kecha, 12:30" },
-    { id: "1004", name: "Sherzod Kabulov", email: "sherz@kabul.com", role: 'user', tariff: 'Starter', registeredAt: "2026-06-01", status: 'Aktiv', lastActive: "Hozirgina" },
-    { id: "1005", name: "Bobur Karimov", email: "bob@karim.org", role: 'user', tariff: 'Pro', registeredAt: "2026-01-18", status: 'Muzlatilgan', lastActive: "3 kun oldin" },
-    { id: "1006", name: "Nodira Umarova", email: "nodira@tashkent.uz", role: 'user', tariff: 'Starter', registeredAt: "2026-02-11", status: 'Bloklangan', lastActive: "1 oy oldin" },
-    { id: "1007", name: "Temur Malikov", email: "temur@malik.co", role: 'user', tariff: 'Pro', registeredAt: "2026-04-05", status: 'Aktiv', lastActive: "Bugun, 14:02" }
-  ]);
+  // Admin data starts empty. Real users should come from backend storage.
+  const [users, setUsers] = useState<AppUser[]>(currentUser ? [currentUser] : []);
 
   // Activity feed
-  const [logs, setLogs] = useState([
-    { time: "19:10", msg: "Dilnoza Aliyeva (dilnot@ali.uz) Pro obunasini yangiladi", type: "success" },
-    { time: "18:55", msg: "Sherzod Kabulov tizimda yangi loyiha yaratdi", type: "info" },
-    { time: "18:32", msg: "Kamola Orifova Starter rejasida ro'yxatdan o'tdi", type: "register" },
-    { time: "17:15", msg: "XALQLAR FOSILI: API so'rovda 500 xatosi yuz berdi", type: "danger" }
-  ]);
+  const [logs, setLogs] = useState<Array<{ time: string; msg: string; type: string }>>([]);
 
   // Filtered users lists
   const filteredUsers = users.filter(u => {
@@ -92,6 +80,13 @@ export default function AdminPanel({ section = 'admin-dashboard' }: AdminPanelPr
     const matchesStatus = filterStatus === 'All' || u.status === filterStatus;
     return matchesSearch && matchesTariff && matchesStatus;
   });
+
+  const activeUsers = users.filter(u => u.status === 'Aktiv').length;
+  const proUsers = users.filter(u => u.tariff === 'Pro').length;
+  const businessUsers = users.filter(u => u.tariff === 'Business').length;
+  const paidUsers = proUsers + businessUsers;
+  const platformRevenue = 0;
+  const churnRate = users.length > 0 ? '0%' : '0%';
 
   const handleUpdateStatus = (userId: string, targetStatus: 'Aktiv' | 'Muzlatilgan' | 'Bloklangan') => {
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: targetStatus } : u));
@@ -184,36 +179,36 @@ export default function AdminPanel({ section = 'admin-dashboard' }: AdminPanelPr
             {/* Card 1 */}
             <div className="bg-[#0d0d0d] border border-[#ffffff0a] p-[18px] rounded-xl space-y-1">
               <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold block">Jami Foydalanuvchilar</span>
-              <div className="text-2xl font-bold font-syne text-[#F0EDE6]">12,847 ta</div>
-              <span className="text-[10px] text-[#2D9F6E] font-bold">▲ +4.1% o'sish</span>
+              <div className="text-2xl font-bold font-syne text-[#F0EDE6]">{users.length.toLocaleString('uz-UZ')} ta</div>
+              <span className="text-[10px] text-[#2D9F6E] font-bold">0% o'sish</span>
             </div>
 
             {/* Card 2 */}
             <div className="bg-[#0d0d0d] border border-[#ffffff0a] p-[18px] rounded-xl space-y-1">
               <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold block">Bugun faol binoan</span>
-              <div className="text-2xl font-bold font-syne text-[#F0EDE6]">1,234 ta</div>
-              <span className="text-[10px] text-zinc-500 font-normal">● 9.6% faollik</span>
+              <div className="text-2xl font-bold font-syne text-[#F0EDE6]">{activeUsers.toLocaleString('uz-UZ')} ta</div>
+              <span className="text-[10px] text-zinc-500 font-normal">0% faollik</span>
             </div>
 
             {/* Card 3 */}
             <div className="bg-[#0d0d0d] border border-[#ffffff0a] p-[18px] rounded-xl space-y-1">
               <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold block">Oylik platforma daromadi</span>
-              <div className="text-2xl font-bold font-syne text-gold">8,450,000 UZS</div>
+              <div className="text-2xl font-bold font-syne text-gold">{platformRevenue.toLocaleString('uz-UZ')} UZS</div>
               <span className="text-[10px] text-zinc-500 font-normal">Faqat Pro va Biznes</span>
             </div>
 
             {/* Card 4 */}
             <div className="bg-[#0d0d0d] border border-gold/15 p-[18px] rounded-xl space-y-1 relative overflow-hidden">
               <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold block">Pro obunachilar</span>
-              <div className="text-2xl font-bold font-syne text-gold-light">2,103 obuna</div>
-              <span className="text-[10px] text-gold font-bold">★ 16% konversiya</span>
+              <div className="text-2xl font-bold font-syne text-gold-light">{paidUsers.toLocaleString('uz-UZ')} obuna</div>
+              <span className="text-[10px] text-gold font-bold">0% konversiya</span>
             </div>
 
             {/* Card 5 */}
             <div className="bg-[#0d0d0d] border border-[#ffffff0a] p-[18px] rounded-xl space-y-1">
               <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold block">Talofat / Churn Rate</span>
-              <div className="text-2xl font-bold font-syne text-[#C0392B]">3.2%</div>
-              <span className="text-[10px] text-zinc-500 font-normal">Optimal holatda</span>
+              <div className="text-2xl font-bold font-syne text-[#C0392B]">{churnRate}</div>
+              <span className="text-[10px] text-zinc-500 font-normal">Ma'lumot yo'q</span>
             </div>
           </div>
 
@@ -230,26 +225,32 @@ export default function AdminPanel({ section = 'admin-dashboard' }: AdminPanelPr
               </div>
 
               <div className="space-y-4 flex-1 overflow-y-auto max-h-[290px] pr-1 py-1">
-                {logs.map((log, idx) => (
-                  <div key={idx} className="flex gap-2.5 text-xs items-start">
-                    <span className="text-zinc-600 font-syne font-bold shrink-0 mt-0.5">{log.time}</span>
-                    <div className="min-w-0 flex-1 leading-normal">
-                      <p className={`font-normal ${
-                        log.type === 'danger' 
-                          ? 'text-[#C0392B]' 
-                          : log.type === 'success' 
-                          ? 'text-[#2D9F6E]' 
-                          : 'text-zinc-350'
-                      }`}>
-                        {log.msg}
-                      </p>
-                    </div>
+                {logs.length === 0 ? (
+                  <div className="h-full min-h-32 flex items-center justify-center text-xs text-zinc-600 text-center">
+                    Hozircha faoliyat yozuvlari yo'q.
                   </div>
-                ))}
+                ) : (
+                  logs.map((log, idx) => (
+                    <div key={idx} className="flex gap-2.5 text-xs items-start">
+                      <span className="text-zinc-600 font-syne font-bold shrink-0 mt-0.5">{log.time}</span>
+                      <div className="min-w-0 flex-1 leading-normal">
+                        <p className={`font-normal ${
+                          log.type === 'danger' 
+                            ? 'text-[#C0392B]' 
+                            : log.type === 'success' 
+                            ? 'text-[#2D9F6E]' 
+                            : 'text-zinc-350'
+                        }`}>
+                          {log.msg}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
 
               <div className="pt-2 border-t border-[#ffffff0c] text-center text-[10px] text-zinc-600 font-semibold uppercase">
-                YUKLAMA 1.4% • SYSTEM ONLINE
+                YUKLAMA 0% • SYSTEM ONLINE
               </div>
             </div>
 
@@ -313,22 +314,18 @@ export default function AdminPanel({ section = 'admin-dashboard' }: AdminPanelPr
                   <span>Tranzaksiyalar</span>
                 </div>
 
-                <div className="flex justify-between text-xs py-1">
-                  <span className="font-semibold text-zinc-300">Dilnoza Aliyeva</span>
-                  <span className="font-bold text-[#2D9F6E]">41 k/ch/oy</span>
-                </div>
-                <div className="flex justify-between text-xs py-1">
-                  <span className="font-semibold text-zinc-300">Jaloliddin Rumi</span>
-                  <span className="font-bold text-[#2D9F6E]">32 k/ch/oy</span>
-                </div>
-                <div className="flex justify-between text-xs py-1">
-                  <span className="font-semibold text-zinc-300">Murad Nazarov</span>
-                  <span className="font-bold text-gold">28 k/ch/oy</span>
-                </div>
-                <div className="flex justify-between text-xs py-1">
-                  <span className="font-semibold text-zinc-305">Temur Malikov</span>
-                  <span className="font-bold text-zinc-500">19 k/ch/oy</span>
-                </div>
+                {users.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-zinc-600">
+                    Hozircha korxonalar yo'q.
+                  </div>
+                ) : (
+                  users.slice(0, 4).map((user) => (
+                    <div key={user.id} className="flex justify-between text-xs py-1">
+                      <span className="font-semibold text-zinc-300">{user.name}</span>
+                      <span className="font-bold text-zinc-500">0 k/ch/oy</span>
+                    </div>
+                  ))
+                )}
               </div>
 
               <div className="border-t border-[#ffffff0a] pt-2 text-center text-[10px]">
@@ -500,9 +497,9 @@ export default function AdminPanel({ section = 'admin-dashboard' }: AdminPanelPr
           {activeTab === 'billing' && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
               {[
-                { name: 'Starter', users: 5420, revenue: '0 UZS', color: 'text-zinc-300' },
-                { name: 'Pro', users: 2103, revenue: '313,347,000 UZS', color: 'text-gold' },
-                { name: 'Business', users: 487, revenue: '218,663,000 UZS', color: 'text-blue-400' }
+                { name: 'Starter', users: users.filter(u => u.tariff === 'Starter').length, revenue: '0 UZS', color: 'text-zinc-300' },
+                { name: 'Pro', users: proUsers, revenue: '0 UZS', color: 'text-gold' },
+                { name: 'Business', users: businessUsers, revenue: '0 UZS', color: 'text-blue-400' }
               ].map((plan) => (
                 <div key={plan.name} className="bg-[#0D0D0D] border border-[#ffffff10] rounded-xl p-5 space-y-3">
                   <div className="flex items-center justify-between">
@@ -555,8 +552,8 @@ export default function AdminPanel({ section = 'admin-dashboard' }: AdminPanelPr
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
               {[
                 { table: 'users', rows: users.length, status: 'Sog‘lom' },
-                { table: 'transactions', rows: 18420, status: 'Sog‘lom' },
-                { table: 'reports', rows: 2381, status: 'Backup faol' }
+                { table: 'transactions', rows: 0, status: 'Ma\'lumot yo\'q' },
+                { table: 'reports', rows: 0, status: 'Ma\'lumot yo\'q' }
               ].map((table) => (
                 <div key={table.table} className="bg-[#0D0D0D] border border-[#ffffff10] rounded-xl p-5 space-y-3">
                   <Database className="w-5 h-5 text-gold" />

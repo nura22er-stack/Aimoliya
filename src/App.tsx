@@ -49,6 +49,8 @@ interface StoredAppData {
   selectedProjectId?: string;
   transactions?: Transaction[];
   userName?: string;
+  userEmail?: string;
+  userRole?: 'user' | 'admin';
   userTariff?: 'Starter' | 'Pro' | 'Business';
   chatHistory?: ChatMessage[];
   recommendations?: Recommendation[];
@@ -69,7 +71,10 @@ export default function App() {
   const [activeView, setActiveView] = useState<ViewType>('landing');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userName, setUserName] = useState(storedData.userName || 'Foydalanuvchi');
-  const [userRole, setUserRole] = useState<'user' | 'admin'>('admin'); // admin so they can fully experience both CFO views
+  const [userEmail, setUserEmail] = useState(storedData.userEmail || '');
+  const [authName, setAuthName] = useState(storedData.userName || '');
+  const [authEmail, setAuthEmail] = useState(storedData.userEmail || '');
+  const [userRole, setUserRole] = useState<'user' | 'admin'>(storedData.userRole || 'user');
   const [userTariff, setUserTariff] = useState<'Starter' | 'Pro' | 'Business'>(storedData.userTariff || 'Starter');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -125,15 +130,28 @@ export default function App() {
       selectedProjectId: selectedProject.id,
       transactions,
       userName,
+      userEmail,
+      userRole,
       userTariff,
       chatHistory,
       recommendations
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }, [projects, selectedProject.id, transactions, userName, userTariff, chatHistory, recommendations]);
+  }, [projects, selectedProject.id, transactions, userName, userEmail, userRole, userTariff, chatHistory, recommendations]);
 
   // Auth logins actions
   const handleDemoLogin = () => {
+    const cleanedName = authName.trim();
+    const cleanedEmail = authEmail.trim();
+    if (cleanedName) {
+      setUserName(cleanedName);
+    } else if (!storedData.userName && cleanedEmail) {
+      setUserName(cleanedEmail.split('@')[0]);
+    }
+    if (cleanedEmail) {
+      setUserEmail(cleanedEmail);
+    }
+    setUserRole('user');
     setIsAuthenticated(true);
     setActiveView('dashboard');
   };
@@ -266,7 +284,29 @@ export default function App() {
       case 'admin-billing':
       case 'admin-notif':
       case 'admin-db':
-        return <AdminPanel section={activeView} />;
+        if (userRole !== 'admin') {
+          return <DashboardView 
+            project={selectedProject} 
+            transactions={transactions}
+            addTransaction={handleAddTransaction}
+            deleteTransaction={handleDeleteTransaction}
+            recommendations={recommendations}
+            applyRecommendation={handleApplyRecommendation}
+          />;
+        }
+        return <AdminPanel
+          section={activeView}
+          currentUser={{
+            id: 'current-user',
+            name: userName,
+            email: userEmail || 'email-kiritilmagan',
+            role: userRole,
+            tariff: userTariff,
+            registeredAt: new Date().toISOString().split('T')[0],
+            status: 'Aktiv',
+            lastActive: 'Hozirgina'
+          }}
+        />;
       default:
         return <DashboardView 
           project={selectedProject} 
@@ -346,6 +386,8 @@ export default function App() {
                     type="text" 
                     required 
                     placeholder="Masalan: Shavkat Husainov" 
+                    value={authName}
+                    onChange={(e) => setAuthName(e.target.value)}
                     className="w-full h-11 px-3.5 rounded-lg bg-black border border-[#ffffff12] text-zinc-200 focus:border-gold outline-none"
                   />
                 </div>
@@ -357,6 +399,8 @@ export default function App() {
                   type="email" 
                   required 
                   placeholder="Masalan: shavkat@aimoliyachi.uz" 
+                  value={authEmail}
+                  onChange={(e) => setAuthEmail(e.target.value)}
                   className="w-full h-11 px-3.5 rounded-lg bg-black border border-[#ffffff12] text-zinc-200 focus:border-gold outline-none"
                 />
               </div>
