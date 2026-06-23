@@ -205,8 +205,8 @@ app.post('/api/simulate', (req, res) => {
   const { scenario, priceChange, employeesCount, marketingBudget, durationMonths, currentStats } = req.body;
 
   // Simple and highly stable mathematical simulator logic based on real inputs
-  const monthlyRevenue = currentStats?.revenue || 12450000;
-  const monthlyExpenses = currentStats?.expenses || 8220000;
+  const monthlyRevenue = currentStats?.revenue ?? 0;
+  const monthlyExpenses = currentStats?.expenses ?? 0;
   const currentEmployees = 5;
   const baseSalaryPerEmployee = 1200000; // UZS average
 

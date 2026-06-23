@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Sparkles, BrainCircuit, Shield } from 'lucide-react';
 import { ViewType, Project, Transaction, Recommendation, ChatMessage } from './types';
 import Sidebar from './components/Sidebar';
@@ -14,20 +14,73 @@ import ReportsView from './views/ReportsView';
 import SettingsView from './views/SettingsView';
 import AdminPanel from './views/AdminPanel';
 
+const STORAGE_KEY = 'ai-moliyachi-data-v2';
+
+const defaultProjects: Project[] = [
+  { id: '1', name: 'Asosiy Biznes', revenue: 0, expenses: 0 }
+];
+
+const defaultRecommendations: Recommendation[] = [
+  {
+    id: 'rec1',
+    title: 'Narxlarni 7% ga oshirish',
+    description: 'Mijozlarning ketish riski pastligini inobatga olgan holda narxni biroz oshirish jami oylik sof foydani oshirishi mumkin.',
+    priority: 'Yuqori',
+    impact: 'Foyda o\'sishi'
+  },
+  {
+    id: 'rec2',
+    title: 'Marketing xarajatlarini ko\'paytirish',
+    description: 'Marketing budjetini oshirish ijtimoiy tarmoqlar orqali xaridorlar oqimini kuchaytirishi mumkin.',
+    priority: 'O\'rta',
+    impact: 'Tranzaksiyalar soni o\'sishi'
+  },
+  {
+    id: 'rec3',
+    title: 'Ijara xarajatlarini optimallash',
+    description: 'Ofis yoki omborxona ijara shartnomasini qayta ko\'rib chiqish va kichikroq bo\'limga o\'tish orqali xarajatlarni qisqartirish.',
+    priority: 'Past',
+    impact: 'Margin barqarorligi'
+  }
+];
+
+interface StoredAppData {
+  projects?: Project[];
+  selectedProjectId?: string;
+  transactions?: Transaction[];
+  userName?: string;
+  userTariff?: 'Starter' | 'Pro' | 'Business';
+  chatHistory?: ChatMessage[];
+  recommendations?: Recommendation[];
+}
+
+const loadStoredData = (): StoredAppData => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw) as StoredAppData;
+  } catch {
+    return {};
+  }
+};
+
 export default function App() {
+  const storedData = loadStoredData();
   const [activeView, setActiveView] = useState<ViewType>('landing');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userName, setUserName] = useState('Nodirbek Alimov');
+  const [userName, setUserName] = useState(storedData.userName || 'Foydalanuvchi');
   const [userRole, setUserRole] = useState<'user' | 'admin'>('admin'); // admin so they can fully experience both CFO views
-  const [userTariff, setUserTariff] = useState<'Starter' | 'Pro' | 'Business'>('Pro');
+  const [userTariff, setUserTariff] = useState<'Starter' | 'Pro' | 'Business'>(storedData.userTariff || 'Starter');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Set up projects lists
-  const [projects, setProjects] = useState<Project[]>([
-    { id: '1', name: 'Asosiy Biznes Chilonzor', revenue: 12450000, expenses: 8220000 },
-    { id: '2', name: '2-filial Yunusobod', revenue: 8400000, expenses: 5400000 }
-  ]);
-  const [selectedProject, setSelectedProject] = useState<Project>(projects[0]);
+  const [projects, setProjects] = useState<Project[]>(
+    storedData.projects?.length ? storedData.projects : defaultProjects
+  );
+  const [selectedProject, setSelectedProject] = useState<Project>(() => {
+    const sourceProjects = storedData.projects?.length ? storedData.projects : defaultProjects;
+    return sourceProjects.find(p => p.id === storedData.selectedProjectId) || sourceProjects[0];
+  });
 
   // Handle setting project name setting change from settings views
   const handleUpdateSelectedProjectName = (name: string) => {
@@ -36,30 +89,23 @@ export default function App() {
   };
 
   // Set up transactions local states
-  const [transactions, setTransactions] = useState<Transaction[]>([
-    { id: 't1', date: '2026-06-06', title: 'Mahsulot sotuvi retail', category: 'Savdo tushumi', type: 'kirim', amount: 4850000 },
-    { id: 't2', date: '2026-06-05', title: 'Korporativ xizmat shartnomasi', category: 'Xizmat ko\'rsatish', type: 'kirim', amount: 7600000 },
-    { id: 't3', date: '2026-06-04', title: 'Ofis ijarasi Iyun', category: 'Ijara xarajatlari', type: 'chiqim', amount: 1800000 },
-    { id: 't4', date: '2026-06-03', title: 'Xodimlar oylik to\'lovlari', category: 'Xodimlar oyliklari', type: 'chiqim', amount: 2500000 },
-    { id: 't5', date: '2026-06-02', title: 'Telegram reklama kanali', category: 'Marketing & Reklama', type: 'chiqim', amount: 1200000 },
-    { id: 't6', date: '2026-06-01', title: 'Aylanma soliq to\'lovi', category: 'Soliqlar va to\'lovlar', type: 'chiqim', amount: 850000 }
-  ]);
+  const [transactions, setTransactions] = useState<Transaction[]>(storedData.transactions || []);
 
   // Set up smart suggestions list
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([
+  const [recommendations, setRecommendations] = useState<Recommendation[]>(storedData.recommendations || [
     { 
       id: 'rec1', 
       title: '📈 Narxlarni 7% ga oshirish', 
-      description: 'Mijozlarning ketish riski pastligini inobatga olgan holda narxni biroz oshirish jami oylik sof foydani +3,200,000 UZS ga oshiradi.',
+      description: 'Mijozlarning ketish riski pastligini inobatga olgan holda narxni biroz oshirish jami oylik sof foydani oshirishi mumkin.',
       priority: 'Yuqori',
-      impact: 'Foyda o\'sishi +15.4%'
+      impact: 'Foyda o\'sishi'
     },
     { 
       id: 'rec2', 
       title: '💡 Marketing xarajatlarini ko\'paytirish', 
       description: 'Marketing budjetini qo\'shimcha 500,000 UZS ga oshirish ijtimoiy tarmoqlar orqali xaridorlar oqimini 18% ga kuchaytiradi.',
       priority: 'O\'rta',
-      impact: 'Tranzaksiyalar soni +8.3%'
+      impact: 'Tranzaksiyalar soni o\'sishi'
     },
     { 
       id: 'rec3', 
@@ -71,7 +117,20 @@ export default function App() {
   ]);
 
   // AI CFO chat historical logging
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>(storedData.chatHistory || []);
+
+  useEffect(() => {
+    const data: StoredAppData = {
+      projects,
+      selectedProjectId: selectedProject.id,
+      transactions,
+      userName,
+      userTariff,
+      chatHistory,
+      recommendations
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }, [projects, selectedProject.id, transactions, userName, userTariff, chatHistory, recommendations]);
 
   // Auth logins actions
   const handleDemoLogin = () => {
@@ -153,8 +212,8 @@ export default function App() {
     const newProj: Project = {
       id: 'p_' + Math.random().toString(),
       name,
-      revenue: 12450000,
-      expenses: 8220000
+      revenue: 0,
+      expenses: 0
     };
     setProjects(prev => [...prev, newProj]);
     setSelectedProject(newProj);

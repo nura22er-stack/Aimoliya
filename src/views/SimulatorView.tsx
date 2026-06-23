@@ -19,10 +19,10 @@ interface SimulatorViewProps {
 
 export default function SimulatorView({ project }: SimulatorViewProps) {
   const [scenario, setScenario] = useState('Narx o\'zgarishi');
-  const [priceChange, setPriceChange] = useState<number>(10); // +10% price
-  const [employeesCount, setEmployeesCount] = useState<number>(5);
-  const [marketingBudget, setMarketingBudget] = useState<number>(800000); // 800,000 UZS
-  const [durationMonths, setDurationMonths] = useState<number>(3);
+  const [priceChange, setPriceChange] = useState<number>(0);
+  const [employeesCount, setEmployeesCount] = useState<number>(0);
+  const [marketingBudget, setMarketingBudget] = useState<number>(0);
+  const [durationMonths, setDurationMonths] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SimulationResult | null>(null);
 

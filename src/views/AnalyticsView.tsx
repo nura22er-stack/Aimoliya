@@ -18,7 +18,7 @@ interface AnalyticsViewProps {
 }
 
 export default function AnalyticsView({ project, transactions }: AnalyticsViewProps) {
-  const [budgetLimit, setBudgetLimit] = useState<number>(5000000); // 5 Million UZS for marketing/rent target
+  const [budgetLimit, setBudgetLimit] = useState<number>(0);
 
   // Calculate totals
   const revenueTrs = transactions.filter(t => t.type === 'kirim');
@@ -30,14 +30,18 @@ export default function AnalyticsView({ project, transactions }: AnalyticsViewPr
   const marginPercent = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) : "0";
 
   // Category distributions
-  const categories = [
-    { name: "Xodimlar oyliklari", allocated: 2500000, color: "bg-gold", icon: Percent },
-    { name: "Ijara xarajatlari", allocated: 1800000, color: "bg-amber-500", icon: Percent },
-    { name: "Soliqlar va to'lovlar", allocated: 850000, color: "bg-blue-500", icon: Percent },
-    { name: "Marketing & Reklama", allocated: 1200000, color: "bg-emerald-500", icon: Percent },
-    { name: "Ofis anjomlari", allocated: 350000, color: "bg-pink-500", icon: Percent },
-    { name: "Boshqalar", allocated: 1520000, color: "bg-zinc-600", icon: Percent },
-  ];
+  const categoryTotals = expenseTrs.reduce<Record<string, number>>((acc, transaction) => {
+    acc[transaction.category] = (acc[transaction.category] || 0) + transaction.amount;
+    return acc;
+  }, {});
+
+  const categoryColors = ["bg-gold", "bg-amber-500", "bg-blue-500", "bg-emerald-500", "bg-pink-500", "bg-zinc-600"];
+  const categories = Object.entries(categoryTotals).map(([name, allocated], index) => ({
+    name,
+    allocated,
+    color: categoryColors[index % categoryColors.length],
+    icon: Percent
+  }));
 
   const totalAllocated = categories.reduce((sum, c) => sum + c.allocated, 0);
 
@@ -62,8 +66,8 @@ export default function AnalyticsView({ project, transactions }: AnalyticsViewPr
         <div className="card bg-bg-card p-5 space-y-2">
           <span className="text-xs text-zinc-500 font-semibold block uppercase">Soliq yuklamasi</span>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-[#F0EDE6] font-syne">7.4%</span>
-            <span className="text-xs bg-amber-500/10 text-amber-500 font-bold px-1.5 py-0.5 rounded">Tekshirilgan</span>
+            <span className="text-3xl font-extrabold text-[#F0EDE6] font-syne">0%</span>
+            <span className="text-xs bg-amber-500/10 text-amber-500 font-bold px-1.5 py-0.5 rounded">Kiritilmagan</span>
           </div>
           <p className="text-[11px] text-zinc-600">Soliq qonunchiligi ostida aylanma soliq 4% optimallashtirilgan optimal holat.</p>
         </div>
@@ -71,8 +75,8 @@ export default function AnalyticsView({ project, transactions }: AnalyticsViewPr
         <div className="card bg-[#0D0D0D] border border-gold/15 p-5 space-y-2">
           <span className="text-xs text-zinc-500 font-semibold block uppercase">Likvidlilik koeffitsiyenti</span>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-[#2D9F6E] font-syne">1.82</span>
-            <span className="text-xs bg-blue-500/10 text-blue-400 font-bold px-1.5 py-0.5 rounded">Juda yaxshi</span>
+            <span className="text-3xl font-extrabold text-[#2D9F6E] font-syne">0</span>
+            <span className="text-xs bg-blue-500/10 text-blue-400 font-bold px-1.5 py-0.5 rounded">Kiritilmagan</span>
           </div>
           <p className="text-[11px] text-zinc-600">Ushbu koeffitsiyent biznesingiz qarz majburiyatlarini qoplashda yuqori hisoblanadi.</p>
         </div>
@@ -129,7 +133,7 @@ export default function AnalyticsView({ project, transactions }: AnalyticsViewPr
 
             <div className="flex justify-between text-xs font-normal py-1">
               <span className="text-zinc-505">Soliqlar (4% aylanmadan + ijara)</span>
-              <span className="text-[#C0392B] font-semibold">-{formatUzS((totalRevenue * 0.04) + 120000)}</span>
+              <span className="text-[#C0392B] font-semibold">-{formatUzS(totalRevenue * 0.04)}</span>
             </div>
 
             <div className="border-t-2 border-dashed border-[#ffffff1c] my-2 pt-2" />
@@ -165,7 +169,7 @@ export default function AnalyticsView({ project, transactions }: AnalyticsViewPr
               </div>
               <input 
                 type="range"
-                min="2000000"
+                min="0"
                 max="15000000"
                 step="500000"
                 value={budgetLimit}
@@ -178,7 +182,7 @@ export default function AnalyticsView({ project, transactions }: AnalyticsViewPr
             <div className="space-y-3 pt-1">
               {categories.map((cat, idx) => {
                 const percentage = totalAllocated > 0 ? ((cat.allocated / totalAllocated) * 100).toFixed(0) : "0";
-                const isOverBudget = cat.allocated > (budgetLimit * (cat.allocated / totalAllocated));
+                const isOverBudget = totalAllocated > 0 && budgetLimit > 0 && cat.allocated > (budgetLimit * (cat.allocated / totalAllocated));
                 return (
                   <div key={idx} className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs leading-normal">

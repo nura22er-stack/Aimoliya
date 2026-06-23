@@ -240,9 +240,9 @@ export default function Landing({ onNavigate, onDemoLogin }: LandingProps) {
                 <div className="space-y-1">
                   <span className="text-[10px] text-[#7A7671] font-mono tracking-wider block uppercase">OYLIK SOF FOYDA (P&L)</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl md:text-3xl font-medium font-mono text-[#1F8A5E]">+15,482,000 UZS</span>
+                    <span className="text-2xl md:text-3xl font-medium font-mono text-[#1F8A5E]">0 UZS</span>
                     <span className="text-[10px] bg-[rgba(31,138,94,0.12)] text-[#1F8A5E] font-bold px-2 py-0.5 rounded-md font-mono">
-                      ↑ +15.4%
+                      0%
                     </span>
                   </div>
                 </div>
@@ -255,18 +255,18 @@ export default function Landing({ onNavigate, onDemoLogin }: LandingProps) {
                   {/* Metric 1 */}
                   <div className="bg-[#141414] p-3 rounded-lg border border-[rgba(255,255,255,0.04)] space-y-1">
                     <span className="text-[9px] text-[#7A7671] font-mono uppercase block">RENTABELLIK KO'RSATKICHI</span>
-                    <span className="text-xl font-bold font-mono text-[#C9A84C] block">38.4%</span>
+                    <span className="text-xl font-bold font-mono text-[#C9A84C] block">0%</span>
                     {/* Linear progress metric bar indicator */}
                     <div className="h-1 w-full bg-[#1A1A1A] rounded-full mt-2 overflow-hidden">
-                      <div className="h-full bg-[#C9A84C] rounded-full" style={{ width: '38.4%' }} />
+                      <div className="h-full bg-[#C9A84C] rounded-full" style={{ width: '0%' }} />
                     </div>
                   </div>
 
                   {/* Metric 2 */}
                   <div className="bg-[#141414] p-3 rounded-lg border border-[rgba(255,255,255,0.04)] space-y-1">
                     <span className="text-[9px] text-[#7A7671] font-mono uppercase block">CASH FLOW STATUS</span>
-                    <span className="text-[13px] text-[#EDEAE3] font-bold block">Barqaror</span>
-                    <span className="text-[10px] text-[#1F8A5E] block leading-none font-medium mt-1">Kassa uzilishi xavfi yo'q</span>
+                    <span className="text-[13px] text-[#EDEAE3] font-bold block">Ma'lumot kutilmoqda</span>
+                    <span className="text-[10px] text-[#1F8A5E] block leading-none font-medium mt-1">Kirim va chiqim kiriting</span>
                   </div>
                 </div>
 
@@ -277,7 +277,7 @@ export default function Landing({ onNavigate, onDemoLogin }: LandingProps) {
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-[#7A7671] font-mono text-[9px] uppercase">XARAJAT KONTROLI:</span>
                   <div className="flex items-center gap-1 text-[#C9A84C] font-semibold">
-                    <span>Yuqori darajada optimallashgan</span>
+                    <span>Ma'lumot kutilmoqda</span>
                     <span className="text-sm">↗</span>
                   </div>
                 </div>
@@ -292,10 +292,10 @@ export default function Landing({ onNavigate, onDemoLogin }: LandingProps) {
                     <span className="text-[#C9A84C] font-bold text-xs font-syne">AI CFO Tavsiyasi:</span>
                   </div>
                   <p className="text-[12.5px] text-[#EDEAE3] leading-normal font-sans">
-                    Narxlarni 7% ga oshirish mijozlar ketish xavfisiz jami sof foydani <strong className="text-[#C9A84C] font-bold">+3,200,000 UZS</strong> ga ko'paytirish imkonini beradi.
+                    Kirim va chiqimlarni kiriting, AI CFO tavsiyasi shu ma'lumotlar asosida shakllanadi.
                   </p>
                   <div className="flex items-center justify-between text-[10.5px] text-[#7A7671] pt-1 font-mono">
-                    <span>Ishonchlilik: 94%</span>
+                    <span>Ishonchlilik: 0%</span>
                     <span className="text-[#C9A84C] font-semibold hover:underline cursor-pointer">Ko'rish →</span>
                   </div>
                 </div>

@@ -91,11 +91,11 @@ export default function Topbar({ title, projectName, userName, setMobileOpen, on
             <div className="space-y-2.5">
               <div className="flex gap-2 text-[11px] text-zinc-300 leading-normal">
                 <Sparkles className="w-3.5 h-3.5 text-gold shrink-0 mt-0.5" />
-                <p><strong>AI CFO Tavsiyasi:</strong> Narxlarni 7% ga ko'tarib Rentabellikni 38.4% ga oshirish mumkin.</p>
+                <p><strong>AI CFO Tavsiyasi:</strong> Kirim va chiqim kiriting, tavsiyalar shu ma'lumot asosida chiqadi.</p>
               </div>
               <div className="flex gap-2 text-[11px] text-zinc-400 leading-normal">
                 <span className="live-dot shrink-0 mt-1" />
-                <p>30 kunlik foyda prognozi 94.2% aniqlik bilan tasdiqlandi.</p>
+                <p>Prognoz foydalanuvchi kiritgan ma'lumotlardan keyin hisoblanadi.</p>
               </div>
             </div>
           </div>

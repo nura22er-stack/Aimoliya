@@ -81,15 +81,15 @@ export default function DashboardView({
   // Monthly values for SVG Chart
   // Make it responsive or visually pleasing. Using SVG curves styled with Tailwind variables is robust & 100% beautiful
   const chartData = [
-    { month: 'Yan', rev: 9200000, exp: 6100000 },
-    { month: 'Fev', rev: 10400000, exp: 6800000 },
-    { month: 'Mar', rev: 11100000, exp: 7400000 },
-    { month: 'Apr', rev: 11800000, exp: 7900000 },
-    { month: 'May', rev: 12450000, exp: 8220000 },
-    { month: 'Iyun', rev: totalRevenue || 12450000, exp: totalExpenses || 8220000 },
+    { month: 'Yan', rev: 0, exp: 0 },
+    { month: 'Fev', rev: 0, exp: 0 },
+    { month: 'Mar', rev: 0, exp: 0 },
+    { month: 'Apr', rev: 0, exp: 0 },
+    { month: 'May', rev: 0, exp: 0 },
+    { month: 'Iyun', rev: totalRevenue, exp: totalExpenses },
   ];
 
-  const maxVal = Math.max(...chartData.map(d => Math.max(d.rev, d.exp))) * 1.1;
+  const maxVal = Math.max(1, ...chartData.map(d => Math.max(d.rev, d.exp))) * 1.1;
 
   // Generate SVG coordinates
   const svgWidth = 500;
@@ -129,7 +129,7 @@ export default function DashboardView({
               {formatUzS(totalRevenue)}
             </h3>
             <span className="text-[11px] text-[#2D9F6E] font-bold flex items-center gap-1">
-              ▲ +8.3% <span className="text-zinc-500 font-normal">o'tgan oyga nisbatan</span>
+              0% <span className="text-zinc-500 font-normal">o'tgan oyga nisbatan</span>
             </span>
           </div>
         </div>
